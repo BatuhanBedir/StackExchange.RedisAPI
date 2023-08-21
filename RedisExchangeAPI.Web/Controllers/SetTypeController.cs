@@ -1,27 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RedisExchangeAPI.Web.Services;
 using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RedisExchangeAPI.Web.Controllers
 {
-    public class ListTypeController : Controller
+    public class SetTypeController : Controller
     {
         private readonly RedisService _redisService;
         private readonly IDatabase _db;
-        private string listKey = "names";
-        public ListTypeController(RedisService redisService)
+        private string listKey = "setnames";
+        public SetTypeController(RedisService redisService)
         {
             _redisService = redisService;
-            _db = _redisService.GetDb(1);
+            _db = _redisService.GetDb(2);
         }
         public IActionResult Index()
         {
-            List<string> names = new();
+            HashSet<string> names = new();
+            
             if(_db.KeyExists(listKey))
             {
-                _db.ListRange(listKey).ToList().ForEach(x =>
+                _db.SetMembers(listKey).ToList().ForEach(x =>
                 {
                     names.Add(x.ToString());
                 });
@@ -32,20 +35,16 @@ namespace RedisExchangeAPI.Web.Controllers
         [HttpPost]
         public IActionResult Add(string name)
         {
-            _db.ListRightPush(listKey, name);
+            _db.KeyExpire(listKey, DateTime.Now.AddMinutes(5));
+
+            _db.SetAdd(listKey, name);
 
             return RedirectToAction("Index");
         }
         [HttpGet]
-        public IActionResult Delete(string name)
+        public async Task<IActionResult> Delete(string name)
         {
-            _db.ListRemoveAsync(listKey, name).Wait() ;
-            return RedirectToAction("Index");
-        }
-        [HttpGet]
-        public IActionResult DeleteFirstItem()
-        {
-            _db.ListLeftPop(listKey);
+            await _db.SetRemoveAsync(listKey, name);
             return RedirectToAction("Index");
         }
     }

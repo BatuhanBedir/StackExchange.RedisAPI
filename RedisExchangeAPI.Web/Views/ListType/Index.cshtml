@@ -1,0 +1,19 @@
+﻿@model List<string>
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<a asp-action="DeleteFirstItem">Delete The First</a>
+<form method="post" asp-action="Add">
+    <label>Name</label>
+    <input type="text" name="name" />
+    <button type="submit">Save</button>
+</form>
+
+<hr />
+@foreach (var item in Model)
+{
+    <h3>@item  <a asp-action="Delete" asp-controller="ListType" asp-route-name="@item">Sil</a></h3>
+}
+

@@ -1,0 +1,21 @@
+﻿@model Dictionary<string, string>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<a asp-action="DeleteFirstItem">Delete The First</a>
+<form method="post" asp-action="Add">
+    <label>Name</label>
+    <input type="text" name="name" />
+    <br />
+    <label>Value</label>
+    <input type="text" name="value" />
+    <br />
+    <button type="submit">Save</button>
+</form>
+
+<hr />
+@foreach (var item in Model)
+{
+    <h3>@item.Key --> @item.Value - <a asp-action="Delete" asp-route-name="@item.Key">Sil</a></h3>
+}
